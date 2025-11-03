@@ -19,63 +19,68 @@
 
      <form id="customerForm">
   <!-- Company & Account -->
-  <section class="grid g-2">
-    <div>
-      <label for="company">Bedrijf</label>
-      <input id="company" name="company" type="text" placeholder="Bedrijfsnaam" required />
-    </div>
-    <div>
-      <label for="clientNumber">Klantnummer</label>
-      <input id="clientNumber" name="clientNumber" type="number" inputmode="numeric" min="0" placeholder="e.g. 10234" />
-    </div>
+<section class="grid g-2">
+  <div>
+    <label for="company">Bedrijf</label>
+    <input id="company" name="company" type="text" placeholder="Bedrijfsnaam" required />
+  </div>
 
-    <div>
-      <label for="vat">BTW / VAT</label>
-      <input id="vat" name="vat" type="text" placeholder="BE0123456789" />
-      <small class="hint" id="vatHint">Formaat: BE + 10 cijfers (BE0 + 9 ook ok)</small>
-    </div>
-    <div>
-      <label for="website">Website</label>
-      <input id="website" name="website" type="url" placeholder="https://www.bedrijf.be" />
-    </div>
+  <div>
+    <label for="clientNumber">Klantnummer</label>
+    <input id="clientNumber" name="clientNumber" type="number" inputmode="numeric" min="0" placeholder="e.g. 10234" />
+  </div>
 
-    <!-- NACE combobox mount -->
-    <div id="nace-combobox"></div>
+  <div>
+    <label for="vat">BTW / VAT</label>
+    <input id="vat" name="vat" type="text" placeholder="BE0123456789" />
+    <small class="hint" id="vatHint">Formaat: BE + 10 cijfers (BE0 + 9 ook ok)</small>
+  </div>
 
-    <div>
-      <label for="employeeCount">Aantal werknemers</label>
-      <input id="employeeCount" name="employeeCount" type="number" inputmode="numeric" min="0" placeholder="e.g. 25" />
-    </div>
+  <div>
+    <label for="website">Website</label>
+    <input id="website" name="website" type="url" placeholder="https://www.bedrijf.be" />
+  </div>
 
-    <div>
-      <label for="email">E-mail</label>
-      <input id="email" name="email" type="email" placeholder="info@bedrijf.be" />
-    </div>
-    <div>
-      <label for="phone">Telefoon</label>
-      <input id="phone" name="phone" type="tel" placeholder="+32 …" autocomplete="tel" />
-    </div>
+  <!-- NACE combobox mount (one full cell) -->
+  <div id="nace-combobox"></div>
 
-    <!-- Address -->
+  <div>
+    <label for="employeeCount">Aantal werknemers</label>
+    <input id="employeeCount" name="employeeCount" type="number" inputmode="numeric" min="0" placeholder="e.g. 25" />
+  </div>
+
+  <div>
+    <label for="email">E-mail</label>
+    <input id="email" name="email" type="email" placeholder="info@bedrijf.be" />
+  </div>
+
+  <div>
+    <label for="phone">Telefoon</label>
+    <input id="phone" name="phone" type="tel" placeholder="+32 …" autocomplete="tel" />
+  </div>
+
+  <!-- Address row -->
+  <div class="grid g-3">
     <div>
       <label for="street">Straat</label>
       <input id="street" name="street" type="text" placeholder="Straatnaam" />
     </div>
-    <div class="grid g-3">
-      <div>
-        <label for="number">Nr</label>
-        <input id="number" name="number" type="text" placeholder="1A" />
-      </div>
-      <div>
-        <label for="postalCode">Postcode</label>
-        <input id="postalCode" name="postalCode" type="text" placeholder="9860" />
-      </div>
-      <div>
-        <label for="city">Gemeente</label>
-        <input id="city" name="city" type="text" placeholder="Oosterzele" />
-      </div>
+    <div>
+      <label for="number">Nr</label>
+      <input id="number" name="number" type="text" placeholder="1A" />
     </div>
-  </section>
+    <div>
+      <label for="postalCode">Postcode</label>
+      <input id="postalCode" name="postalCode" type="text" placeholder="9860" />
+    </div>
+  </div>
+
+  <div>
+    <label for="city">Gemeente</label>
+    <input id="city" name="city" type="text" placeholder="Oosterzele" />
+  </div>
+</section>
+
 
   <!-- Contacts (Repeater) -->
   <section class="mt-12">
