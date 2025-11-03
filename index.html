@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Geotracer Klantenfiche</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card" id="sheet">
+      <header>
+        <h1>Klantenfiche</h1>
+        <small id="today"></small>
+      </header>
+
+      <form id="customerForm">
+        <section class="grid g-2">
+          <div>
+            <label for="company">Bedrijf</label>
+            <input id="company" name="company" type="text" placeholder="Bedrijfsnaam" required />
+          </div>
+          <div>
+            <label for="clientNumber">Klantnummer</label>
+            <input id="clientNumber" name="clientNumber" type="number" inputmode="numeric" min="0"
+              placeholder="e.g. 10234" />
+          </div>
+
+          <div id="nace-combobox"></div>
+          <div>
+            <label for="employeeCount">Aantal werknemers</label>
+            <input id="employeeCount" name="employeeCount" type="number" inputmode="numeric" min="0"
+              placeholder="e.g. 25" />
+          </div>
+
+          <div>
+            <label for="contact">Contactpersoon</label>
+            <input id="contact" name="contact" type="text" placeholder="Naam" autocomplete="name" />
+          </div>
+          <div>
+            <label for="phone">Telefoonnummer</label>
+            <input id="phone" name="phone" type="tel" placeholder="+32 …" autocomplete="tel" />
+          </div>
+        </section>
+
+        <section class="mt-12">
+          <fieldset>
+            <legend>Notes</legend>
+            <textarea id="notes" name="notes"
+              placeholder="Context, hoe gebruiken ze de app vandaag? Opmerkingen..."></textarea>
+          </fieldset>
+        </section>
+
+        <section class="grid g-2 mt-12">
+          <div>
+            <label><input type="checkbox" id="needsFollowUp" name="needsFollowUp" /> Needs follow-up</label>
+          </div>
+          <fieldset>
+            <legend>Modules</legend>
+            <div class="grid g-2">
+              <label><input type="checkbox" name="modules" value="time_registration" /> Tijdsregistratie</label>
+              <label><input type="checkbox" name="modules" value="tacho_downloads" /> Tacho downloads</label>
+              <label><input type="checkbox" name="modules" value="tacho_analysis" /> Tacho analyse</label>
+              <label><input type="checkbox" name="modules" value="jobs" /> Taken / Jobs</label>
+              <label><input type="checkbox" name="modules" value="identification" /> Identificatie</label>
+              <label><input type="checkbox" name="modules" value="asset_management" /> Asset management</label>
+            </div>
+          </fieldset>
+        </section>
+      </form>
+      <div class="footer toolbar">
+        <div class="left">
+          <button type="button" id="btnReset">Reset</button>
+        </div>
+        <div class="right">
+          <button type="button" id="btnExportJson">Export JSON</button>
+          <button type="button" id="btnExportCsv">Export CSV</button>
+          <button type="button" class="primary" id="btnPrint">Save as PDF</button>
+        </div>
+      </div>
+      <footer class="footer brand-block">
+        <p class="brand">GeoTracer</p>
+        <p class="location">Lange Ambachtstraat 16 A, 9860 Oosterzele, België<br>BE 0448.296.881</p>
+      </footer>
+    </div>
+  </div>
+  <script src="components/nace-combobox.js" type="module"></script>
+  <script type="module">
+    import { initNaceCombobox } from './components/nace-combobox.js';
+    // Initialize after DOM is ready
+    window.addEventListener('DOMContentLoaded', () => {
+      initNaceCombobox({ mountId: 'nace-combobox', src: 'data/nace.json', placeholder: 'Zoek NACE code…' });
+    });
+  </script>
+  <script defer src="app.js"></script>
+</body>
+
+</html>
