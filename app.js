@@ -1,215 +1,295 @@
-// ---------- helpers ----------
-const el = (sel, root=document) => root.querySelector(sel);
-const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+const BE_VAT_REGEX = /^BE\s?0?\d{9}$/i;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const E164_LOOSE = /^\+[\d\s\-().]{7,}$/; // relaxed for UX
 
-const STORAGE_KEY = 'customerSheet.v1';
+function markValidity(el, ok, hintSel) {
+  if (!el) return;
+  el.classList.toggle("is-invalid", !ok);
+  if (hintSel) {
+    const h = document.querySelector(hintSel);
+    if (h) h.classList.toggle("error", !ok);
+  }
+}
+
+// ---------- helpers ----------
+const el = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+const STORAGE_KEY = "customerSheet.v1";
 const STATUS_DEBOUNCE_MS = 400;
 
-const todayEl = el('#today');
+const todayEl = el("#today");
 if (todayEl) {
-  todayEl.textContent = new Date().toLocaleDateString(undefined, { year:'numeric', month:'short', day:'2-digit' });
+  todayEl.textContent = new Date().toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+  });
 }
-const saveStatusEl = el('#saveStatus');
+const saveStatusEl = el("#saveStatus");
 
 const uuid = () =>
-  'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c =>{
+  "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = crypto.getRandomValues(new Uint8Array(1))[0] & 15;
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 
-const safeFileBase = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const safeFileBase = (s) =>
+  s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 
-function download(filename, mime, content){
-  const blob = new Blob([content], {type:mime});
+function download(filename, mime, content) {
+  const blob = new Blob([content], { type: mime });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename; a.style.display='none';
-  document.body.appendChild(a); a.click(); a.remove();
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.style.display = "none";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
   URL.revokeObjectURL(url);
 }
 
 // ---------- contacts state ----------
 let contacts = []; // array of objects
 
-function newContact(overrides = {}){
+function newContact(overrides = {}) {
   return {
     id: uuid(),
-    name: '',
-    role: 'Owner',
-    email: '',
-    phone: '',
+    name: "",
+    role: "Owner",
+    email: "",
+    phone: "",
     primary: contacts.length === 0, // first is primary by default
-    channel: 'email',
-    notes: '',
-    ...overrides
+    channel: "email",
+    notes: "",
+    ...overrides,
   };
 }
 
-function setPrimary(id){
-  contacts = contacts.map(c => ({ ...c, primary: c.id === id }));
+function setPrimary(id) {
+  contacts = contacts.map((c) => ({ ...c, primary: c.id === id }));
   renderContacts();
   scheduleSave();
 }
 
-function removeContact(id){
-  const wasPrimary = contacts.find(c => c.id === id)?.primary;
-  contacts = contacts.filter(c => c.id !== id);
+function removeContact(id) {
+  const wasPrimary = contacts.find((c) => c.id === id)?.primary;
+  contacts = contacts.filter((c) => c.id !== id);
   if (wasPrimary && contacts.length) contacts[0].primary = true;
   renderContacts();
   scheduleSave();
 }
 
-function upsertContact(id, patch){
-  contacts = contacts.map(c => c.id === id ? ({ ...c, ...patch }) : c);
+function upsertContact(id, patch) {
+  contacts = contacts.map((c) => (c.id === id ? { ...c, ...patch } : c));
   scheduleSave();
 }
 
-function renderContacts(){
-  const host = el('#contacts');
+function renderContacts() {
+  const host = el("#contacts");
   if (!host) return;
-  host.innerHTML = '';
+  host.innerHTML = "";
 
   if (!contacts.length) contacts.push(newContact());
 
   contacts.forEach((c, idx) => {
-    const card = document.createElement('div');
-    card.className = 'contact-card';
+    const card = document.createElement("div");
+    card.className = "contact-card";
     card.dataset.id = c.id;
 
     card.innerHTML = `
       <div class="contact-grid">
         <div class="span-2">
           <label>Naam
-            <input type="text" data-k="name" value="${escapeHtml(c.name)}" placeholder="Volledige naam">
+            <input type="text" data-k="name" value="${escapeHtml(
+              c.name
+            )}" placeholder="Volledige naam">
           </label>
         </div>
         <div>
           <label>Rol
             <select data-k="role" value="${escapeHtml(c.role)}">
-              ${['Owner','Fleet','HR/Payroll','IT','Finance','Operations'].map(r => `<option ${r===c.role?'selected':''}>${r}</option>`).join('')}
+              ${["Owner", "Fleet", "HR/Payroll", "IT", "Finance", "Operations"]
+                .map(
+                  (r) =>
+                    `<option ${r === c.role ? "selected" : ""}>${r}</option>`
+                )
+                .join("")}
             </select>
           </label>
         </div>
         <div class="inline">
           <label class="inline">
-            <input type="checkbox" data-k="primary" ${c.primary ? 'checked' : ''}> Primair
+            <input type="checkbox" data-k="primary" ${
+              c.primary ? "checked" : ""
+            }> Primair
           </label>
         </div>
 
         <div>
           <label>Voorkeur
             <select data-k="channel" value="${escapeHtml(c.channel)}">
-              ${['email','phone','teams'].map(ch => `<option ${ch===c.channel?'selected':''}>${ch}</option>`).join('')}
+              ${["email", "phone", "teams"]
+                .map(
+                  (ch) =>
+                    `<option ${
+                      ch === c.channel ? "selected" : ""
+                    }>${ch}</option>`
+                )
+                .join("")}
             </select>
           </label>
         </div>
         <div>
           <label>Email
-            <input type="email" data-k="email" value="${escapeHtml(c.email)}" placeholder="naam@bedrijf.be">
+            <input type="email" data-k="email" value="${escapeHtml(
+              c.email
+            )}" placeholder="naam@bedrijf.be">
           </label>
         </div>
         <div>
           <label>Telefoon
-            <input type="tel" data-k="phone" value="${escapeHtml(c.phone)}" placeholder="+32 …">
+            <input type="tel" data-k="phone" value="${escapeHtml(
+              c.phone
+            )}" placeholder="+32 …">
           </label>
         </div>
 
         <div class="span-2">
           <label>Notities
-            <input type="text" data-k="notes" value="${escapeHtml(c.notes)}" placeholder="Opmerkingen">
+            <input type="text" data-k="notes" value="${escapeHtml(
+              c.notes
+            )}" placeholder="Opmerkingen">
           </label>
         </div>
       </div>
 
       <div class="contact-actions no-print-controls">
-        <span class="badge">Contact ${idx+1}</span>
+        <span class="badge">Contact ${idx + 1}</span>
         <div style="flex:1"></div>
         <button type="button" data-action="remove">Verwijderen</button>
       </div>
     `;
 
     // wire events
-    card.addEventListener('input', (e) => {
+    card.addEventListener("input", (e) => {
       const key = e.target?.dataset?.k;
       if (!key) return;
-      if (key === 'primary') return; // handled on change
+      if (key === "primary") return; // handled on change
       upsertContact(c.id, { [key]: e.target.value });
     });
-    card.addEventListener('change', (e) => {
+    card.addEventListener("change", (e) => {
       const key = e.target?.dataset?.k;
       if (!key) return;
-      if (key === 'primary') {
+      if (key === "primary") {
         if (e.target.checked) setPrimary(c.id);
-        else { // unchecking primary keeps it primary to ensure one primary exists
+        else {
+          // unchecking primary keeps it primary to ensure one primary exists
           renderContacts();
         }
-      } else if (key === 'role' || key === 'channel') {
+      } else if (key === "role" || key === "channel") {
         upsertContact(c.id, { [key]: e.target.value });
       }
     });
-    card.querySelector('[data-action="remove"]').addEventListener('click', () => removeContact(c.id));
+    card
+      .querySelector('[data-action="remove"]')
+      .addEventListener("click", () => removeContact(c.id));
 
     host.appendChild(card);
   });
 }
 
-function escapeHtml(s=''){
+function escapeHtml(s = "") {
   return String(s)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 // ---------- form collect/fill ----------
-function collectForm(){
-  const form = el('#customerForm');
-  const modules = $$('input[name="modules"]:checked', form).map(i=>i.value);
-
-  // Support either the combobox (#naceInput) or the simple field (#nace)
-  const naceEl = document.getElementById('naceInput') || document.getElementById('nace');
+function collectForm() {
+  const form = el("#customerForm");
+  const modules = $$('input[name="modules"]:checked', form).map((i) => i.value);
+  const naceEl =
+    document.getElementById("naceInput") || document.getElementById("nace");
 
   return {
     id: currentId || uuid(),
-    company: el('#company').value.trim(),
-    clientNumber: Number(el('#clientNumber').value || 0),
-    nace: (naceEl?.value || '').trim(),
-    employeeCount: Number(el('#employeeCount').value || 0),
-    contact: el('#contact').value.trim(),
-    phone: el('#phone').value.trim(),
-    notes: el('#notes').value.trim(),
-    needsFollowUp: el('#needsFollowUp').checked,
+    company: el("#company").value.trim(),
+    clientNumber: Number(el("#clientNumber").value || 0),
+    vat: el("#vat").value.trim(),
+    nace: (naceEl?.value || "").trim(),
+    employeeCount: Number(el("#employeeCount").value || 0),
+    email: el("#email").value.trim(),
+    phone: el("#phone").value.trim(),
+    website: el("#website").value.trim(),
+    address: {
+      street: el("#street").value.trim(),
+      number: el("#number").value.trim(),
+      postalCode: el("#postalCode").value.trim(),
+      city: el("#city").value.trim(),
+      country: "BE",
+    },
+    badgeRegime: el("#badgeRegime")?.value || "",
+    badgeType: el("#badgeType")?.value || "",
+    tachoDownloadFrequency: el("#tachoFrequency")?.value || "",
+    representative: el("#representative")?.value.trim() || "",
+    reseller: el("#reseller")?.value.trim() || "",
+    notes: el("#notes").value.trim(),
+    needsFollowUp: el("#needsFollowUp").checked,
     modules,
     contacts: contacts.slice(),
     createdAtISO: new Date().toISOString(),
-    version: 1
+    version: 1,
   };
 }
 
-function fillForm(d){
+function fillForm(d) {
   if (!d) return;
   currentId = d.id || currentId || uuid();
 
-  el('#company').value = d.company ?? '';
-  el('#clientNumber').value = d.clientNumber ?? '';
-  el('#employeeCount').value = d.employeeCount ?? '';
-  el('#contact').value = d.contact ?? '';
-  el('#phone').value = d.phone ?? '';
-  el('#notes').value = d.notes ?? '';
-  el('#needsFollowUp').checked = !!d.needsFollowUp;
+  el("#company").value = d.company ?? "";
+  el("#clientNumber").value = d.clientNumber ?? "";
+  el("#vat") && (el("#vat").value = d.vat ?? "");
+  el("#employeeCount").value = d.employeeCount ?? "";
+  el("#email") && (el("#email").value = d.email ?? "");
+  el("#phone").value = d.phone ?? "";
+  el("#website") && (el("#website").value = d.website ?? "");
+  el("#street") && (el("#street").value = d.address?.street ?? "");
+  el("#number") && (el("#number").value = d.address?.number ?? "");
+  el("#postalCode") && (el("#postalCode").value = d.address?.postalCode ?? "");
+  el("#city") && (el("#city").value = d.address?.city ?? "");
+  el("#badgeRegime") && (el("#badgeRegime").value = d.badgeRegime ?? "");
+  el("#badgeType") && (el("#badgeType").value = d.badgeType ?? "");
+  el("#tachoFrequency") &&
+    (el("#tachoFrequency").value = d.tachoDownloadFrequency ?? "");
+  el("#representative") &&
+    (el("#representative").value = d.representative ?? "");
+  el("#reseller") && (el("#reseller").value = d.reseller ?? "");
 
-  // NACE
-  const naceEl = document.getElementById('naceInput') || document.getElementById('nace');
-  if (naceEl) naceEl.value = d.nace ?? '';
+  el("#notes").value = d.notes ?? "";
+  el("#needsFollowUp").checked = !!d.needsFollowUp;
 
-  // Modules
-  $$('input[name="modules"]').forEach(chk => {
-    chk.checked = Array.isArray(d.modules) ? d.modules.includes(chk.value) : false;
+  const naceEl =
+    document.getElementById("naceInput") || document.getElementById("nace");
+  if (naceEl) naceEl.value = d.nace ?? "";
+
+  $$('input[name="modules"]').forEach((chk) => {
+    chk.checked = Array.isArray(d.modules)
+      ? d.modules.includes(chk.value)
+      : false;
   });
 
-  // Contacts
-  contacts = Array.isArray(d.contacts) && d.contacts.length ? d.contacts : [newContact()];
+  contacts =
+    Array.isArray(d.contacts) && d.contacts.length
+      ? d.contacts
+      : [newContact()];
   renderContacts();
 }
 
@@ -217,27 +297,33 @@ function fillForm(d){
 let currentId = null;
 let saveTimer = null;
 
-function scheduleSave(){
+function scheduleSave() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(saveDraft, STATUS_DEBOUNCE_MS);
 }
 
-function saveDraft(){
+function saveDraft() {
   const data = collectForm();
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({
-    lastSaved: new Date().toISOString(),
-    data
-  }));
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({
+      lastSaved: new Date().toISOString(),
+      data,
+    })
+  );
   if (saveStatusEl) {
     const dt = new Date();
-    saveStatusEl.textContent = `Auto-opgeslagen ${dt.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
+    saveStatusEl.textContent = `Auto-opgeslagen ${dt.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    })}`;
   }
 }
 
-function loadDraft(){
-  try{
+function loadDraft() {
+  try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw) {
+    if (!raw) {
       contacts = [newContact()];
       renderContacts();
       return;
@@ -246,77 +332,147 @@ function loadDraft(){
     fillForm(data);
     if (saveStatusEl && lastSaved) {
       const dt = new Date(lastSaved);
-      saveStatusEl.textContent = `Laatst opgeslagen ${dt.toLocaleDateString()} ${dt.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
+      saveStatusEl.textContent = `Laatst opgeslagen ${dt.toLocaleDateString()} ${dt.toLocaleTimeString(
+        [],
+        { hour: "2-digit", minute: "2-digit" }
+      )}`;
     }
-  }catch(e){
-    console.warn('Kon concept niet laden', e);
+  } catch (e) {
+    console.warn("Kon concept niet laden", e);
     contacts = [newContact()];
     renderContacts();
   }
 }
 
 // Wire autosave on input changes
-function wireAutosave(){
-  const form = el('#customerForm');
-  form.addEventListener('input', scheduleSave);
-  form.addEventListener('change', scheduleSave);
+function wireAutosave() {
+  const form = el("#customerForm");
+  form.addEventListener("input", scheduleSave);
+  form.addEventListener("change", scheduleSave);
+}
+
+function wireValidation() {
+  const vatEl = el("#vat");
+  const emailEl = el("#email");
+  const phoneEl = el("#phone");
+
+  if (vatEl) {
+    vatEl.addEventListener("input", () => {
+      const v = vatEl.value.trim().toUpperCase();
+      markValidity(vatEl, !v || BE_VAT_REGEX.test(v), "#vatHint");
+    });
+  }
+  if (emailEl) {
+    emailEl.addEventListener("input", () => {
+      const v = emailEl.value.trim();
+      markValidity(emailEl, !v || EMAIL_REGEX.test(v));
+    });
+  }
+  if (phoneEl) {
+    phoneEl.addEventListener("input", () => {
+      const v = phoneEl.value.trim();
+      markValidity(phoneEl, !v || E164_LOOSE.test(v));
+    });
+  }
 }
 
 // ---------- actions ----------
-function ensureMinimal(){
-  const company = el('#company').value.trim();
-  if(!company){
-    alert('Gelieve een bedrijf op te geven.');
-    el('#company').focus();
+function ensureMinimal() {
+  const company = el("#company").value.trim();
+  if (!company) {
+    alert("Gelieve een bedrijf op te geven.");
+    el("#company").focus();
     return false;
   }
   return true;
 }
 
-el('#btnExportJson').addEventListener('click', ()=>{
-  if(!ensureMinimal()) return;
+el("#btnExportJson").addEventListener("click", () => {
+  if (!ensureMinimal()) return;
   const data = collectForm();
-  const base = data.company ? safeFileBase(data.company) : 'customer';
-  download(`customer-sheet_${base}.json`, 'application/json', JSON.stringify(data, null, 2));
+  const base = data.company ? safeFileBase(data.company) : "customer";
+  download(
+    `customer-sheet_${base}.json`,
+    "application/json",
+    JSON.stringify(data, null, 2)
+  );
 });
 
-el('#btnExportCsv').addEventListener('click', ()=>{
-  if(!ensureMinimal()) return;
+el("#btnExportCsv").addEventListener("click", () => {
+  if (!ensureMinimal()) return;
   const d = collectForm();
-  const headers = ['company','clientNumber','nace','employeeCount','contact','phone','needsFollowUp','modules','notes','createdAtISO'];
+  const headers = [
+    "company",
+    "clientNumber",
+    "vat",
+    "nace",
+    "employeeCount",
+    "email",
+    "phone",
+    "website",
+    "street",
+    "number",
+    "postalCode",
+    "city",
+    "country",
+    "badgeRegime",
+    "badgeType",
+    "tachoDownloadFrequency",
+    "representative",
+    "reseller",
+    "needsFollowUp",
+    "modules",
+    "notes",
+    "createdAtISO",
+  ];
   const values = [
     d.company,
     d.clientNumber,
+    d.vat,
     d.nace,
     d.employeeCount,
-    d.contact,
+    d.email,
     d.phone,
+    d.website,
+    d.address?.street || "",
+    d.address?.number || "",
+    d.address?.postalCode || "",
+    d.address?.city || "",
+    d.address?.country || "BE",
+    d.badgeRegime,
+    d.badgeType,
+    d.tachoDownloadFrequency,
+    d.representative,
+    d.reseller,
     d.needsFollowUp,
-    d.modules.join('|'),
-    d.notes.replace(/\r?\n/g,' '),
-    d.createdAtISO
+    d.modules.join("|"),
+    (d.notes || "").replace(/\r?\n/g, " "),
+    d.createdAtISO,
   ];
-  const csv = [headers.join(','), values.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')].join('\n');
-  const base = d.company ? safeFileBase(d.company) : 'customer';
-  download(`customer-sheet_${base}.csv`, 'text/csv', csv);
+  const csv = [
+    headers.join(","),
+    values.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","),
+  ].join("\n");
+  const base = d.company ? safeFileBase(d.company) : "customer";
+  download(`customer-sheet_${base}.csv`, "text/csv", csv);
 });
 
-el('#btnPrint').addEventListener('click', ()=>{
-  if(!ensureMinimal()) return;
+el("#btnPrint").addEventListener("click", () => {
+  if (!ensureMinimal()) return;
   window.print();
 });
 
-el('#btnReset').addEventListener('click', ()=>{
-  if (!confirm('Formulier en concept wissen?')) return;
-  el('#customerForm').reset();
+el("#btnReset").addEventListener("click", () => {
+  if (!confirm("Formulier en concept wissen?")) return;
+  el("#customerForm").reset();
   contacts = [newContact()];
   renderContacts();
   localStorage.removeItem(STORAGE_KEY);
-  if (saveStatusEl) saveStatusEl.textContent = '';
+  if (saveStatusEl) saveStatusEl.textContent = "";
 });
 
 // add-contact
-el('#btnAddContact').addEventListener('click', ()=>{
+el("#btnAddContact").addEventListener("click", () => {
   contacts.push(newContact());
   renderContacts();
   scheduleSave();
@@ -325,4 +481,5 @@ el('#btnAddContact').addEventListener('click', ()=>{
 // ---------- init ----------
 loadDraft();
 wireAutosave();
+wireValidation();
 renderContacts();
