@@ -337,3 +337,19 @@ footer.footer.brand-block {
     grid-column: auto;
   }
 }
+
+
+.card > section { padding: 0 24px 24px; }
+
+fieldset { padding: 12px; }
+.grid { gap: 12px; }
+
+input, select, textarea { line-height: 1.2; }
+
+@media (max-width: 1200px){
+  .contact-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .contact-grid .span-2 { grid-column: span 2; }
+}
+@media (max-width: 900px){
+  .contact-grid { grid-template-columns: 1fr 1fr; }
+}
