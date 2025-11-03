@@ -105,7 +105,7 @@
   <!-- Modules & Follow-up -->
   <section class="grid g-2 mt-12">
     <div>
-      <label><input type="checkbox" id="needsFollowUp" name="needsFollowUp" /> Needs follow-up</label>
+      <label><input type="checkbox" id="needsFollowUp" name="needsFollowUp" /> Follow-up</label>
     </div>
     <fieldset>
       <legend>Modules</legend>
@@ -113,7 +113,7 @@
         <label><input type="checkbox" name="modules" value="time_registration" /> Tijdsregistratie</label>
         <label><input type="checkbox" name="modules" value="tacho_downloads" /> Tacho downloads</label>
         <label><input type="checkbox" name="modules" value="tacho_analysis" /> Tacho analyse</label>
-        <label><input type="checkbox" name="modules" value="jobs" /> Taken / Jobs</label>
+        <label><input type="checkbox" name="modules" value="jobs" /> Jobs</label>
         <label><input type="checkbox" name="modules" value="identification" /> Identificatie</label>
         <label><input type="checkbox" name="modules" value="asset_management" /> Asset management</label>
       </div>
@@ -201,6 +201,10 @@
       </footer>
     </div>
   </div>
+  <div style="display: none;">
+  <label for="sheetId">Sheet ID</label>
+  <input id="sheetId" name="sheetId" type="text" readonly placeholder="auto-generated" />
+</div>
 <script type="module">
   import { initNaceCombobox } from './components/nace-combobox.js';
   window.addEventListener('DOMContentLoaded', () => {
