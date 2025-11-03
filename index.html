@@ -1,22 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="nl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Geotracer Klantenfiche</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
-
 <body>
   <div class="wrap">
     <div class="card" id="sheet">
       <header>
         <h1>Klantenfiche</h1>
-        <small id="today"></small>
+        <div class="meta">
+          <small id="today"></small>
+          <small id="saveStatus" class="muted"></small>
+        </div>
       </header>
 
       <form id="customerForm">
+        <!-- Company & Account -->
         <section class="grid g-2">
           <div>
             <label for="company">Bedrijf</label>
@@ -24,15 +26,16 @@
           </div>
           <div>
             <label for="clientNumber">Klantnummer</label>
-            <input id="clientNumber" name="clientNumber" type="number" inputmode="numeric" min="0"
-              placeholder="e.g. 10234" />
+            <input id="clientNumber" name="clientNumber" type="number" inputmode="numeric" min="0" placeholder="e.g. 10234" />
           </div>
 
-          <div id="nace-combobox"></div>
+          <div>
+            <label for="nace">NACE code</label>
+            <input id="nace" name="nace" type="text" placeholder="e.g. 43.120 — Electrical installation" />
+          </div>
           <div>
             <label for="employeeCount">Aantal werknemers</label>
-            <input id="employeeCount" name="employeeCount" type="number" inputmode="numeric" min="0"
-              placeholder="e.g. 25" />
+            <input id="employeeCount" name="employeeCount" type="number" inputmode="numeric" min="0" placeholder="e.g. 25" />
           </div>
 
           <div>
@@ -40,19 +43,32 @@
             <input id="contact" name="contact" type="text" placeholder="Naam" autocomplete="name" />
           </div>
           <div>
-            <label for="phone">Telefoonnummer</label>
+            <label for="phone">Telefoon</label>
             <input id="phone" name="phone" type="tel" placeholder="+32 …" autocomplete="tel" />
           </div>
         </section>
 
+        <!-- Contacts (Repeater) -->
         <section class="mt-12">
-          <fieldset>
-            <legend>Notes</legend>
-            <textarea id="notes" name="notes"
-              placeholder="Context, hoe gebruiken ze de app vandaag? Opmerkingen..."></textarea>
+          <fieldset class="no-print-controls">
+            <legend>Contacten</legend>
+            <div id="contacts" class="repeater"></div>
+            <div class="repeater-actions">
+              <button type="button" id="btnAddContact">+ Contact toevoegen</button>
+            </div>
+            <p class="hint">Duid één contact aan als “primair”.</p>
           </fieldset>
         </section>
 
+        <!-- Notes -->
+        <section class="mt-12">
+          <fieldset>
+            <legend>Notities</legend>
+            <textarea id="notes" name="notes" placeholder="Context, hoe gebruiken ze de app vandaag? Opmerkingen..."></textarea>
+          </fieldset>
+        </section>
+
+        <!-- Modules & Follow-up -->
         <section class="grid g-2 mt-12">
           <div>
             <label><input type="checkbox" id="needsFollowUp" name="needsFollowUp" /> Needs follow-up</label>
@@ -70,6 +86,8 @@
           </fieldset>
         </section>
       </form>
+
+      <!-- Actions -->
       <div class="footer toolbar">
         <div class="left">
           <button type="button" id="btnReset">Reset</button>
@@ -80,21 +98,15 @@
           <button type="button" class="primary" id="btnPrint">Save as PDF</button>
         </div>
       </div>
+
+      <!-- Brand block (centered) -->
       <footer class="footer brand-block">
         <p class="brand">GeoTracer</p>
         <p class="location">Lange Ambachtstraat 16 A, 9860 Oosterzele, België<br>BE 0448.296.881</p>
       </footer>
     </div>
   </div>
-  <script src="components/nace-combobox.js" type="module"></script>
-  <script type="module">
-    import { initNaceCombobox } from './components/nace-combobox.js';
-    // Initialize after DOM is ready
-    window.addEventListener('DOMContentLoaded', () => {
-      initNaceCombobox({ mountId: 'nace-combobox', src: 'data/nace.json', placeholder: 'Zoek NACE code…' });
-    });
-  </script>
+
   <script defer src="app.js"></script>
 </body>
-
 </html>
