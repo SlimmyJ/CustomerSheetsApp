@@ -134,7 +134,9 @@ fieldset {
 fieldset legend {
   padding: 0 6px;
   color: var(--muted);
+  width: auto;
 }
+
 
 .hint {
   color: var(--muted);
