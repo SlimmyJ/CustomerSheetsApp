@@ -7,6 +7,15 @@
   box-sizing: border-box;
 }
 
+/* Google Font: Open Sans Light */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap');
+
+/* Google Font: Inter */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+
+
+
 :root {
   --paper: #ffffff;
   --ink: #111827;
@@ -22,7 +31,10 @@ body {
   height: 100%;
   background: #f7f7f8;
   color: var(--ink);
-  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Helvetica Neue", sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, 'Helvetica Neue', sans-serif;
+  font-weight: 300; /* Light default */
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 /* ================================
@@ -426,6 +438,13 @@ footer.footer.brand-block {
     border: none;
     padding: 0 0 10px 0;
   }
+
+  @media print {
+  body {
+    font-family: 'Open Sans', Arial, sans-serif;
+    font-weight: 300;
+  }
+}
 
   /* Hide UI-only elements on print */
   .toolbar,
