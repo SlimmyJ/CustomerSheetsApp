@@ -170,7 +170,6 @@ function renderContacts() {
       </div>
 
       <div class="contact-actions no-print-controls">
-        <span class="badge">Contact ${idx + 1}</span>
         <div style="flex:1"></div>
         <button type="button" data-action="remove">Verwijderen</button>
       </div>

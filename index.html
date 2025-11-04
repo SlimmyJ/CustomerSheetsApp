@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="nl">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Geotracer Klantenfiche</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
   <div class="wrap">
     <div class="card" id="sheet">
@@ -17,182 +19,181 @@
         </div>
       </header>
 
-     <form id="customerForm">
-  <!-- Company & Account -->
-<section class="grid g-2">
-  <div>
-    <label for="company">Bedrijf</label>
-    <input id="company" name="company" type="text" placeholder="Bedrijfsnaam" required />
-  </div>
+      <form id="customerForm">
+        <!-- Company & Account -->
+        <section class="grid g-2">
+          <div>
+            <label for="company">Bedrijf</label>
+            <input id="company" name="company" type="text" placeholder="Bedrijfsnaam" required />
+          </div>
 
-  <div>
-    <label for="clientNumber">Klantnummer</label>
-    <input id="clientNumber" name="clientNumber" type="number" inputmode="numeric" min="0" placeholder="e.g. 10234" />
-  </div>
+          <div>
+            <label for="clientNumber">Klantnummer</label>
+            <input id="clientNumber" name="clientNumber" type="number" inputmode="numeric" min="0"
+              placeholder="e.g. 10234" />
+          </div>
 
-  <div>
-    <label for="vat">BTW / VAT</label>
-    <input id="vat" name="vat" type="text" placeholder="BE0123456789" />
-    <small class="hint" id="vatHint">Formaat: BE + 10 cijfers (BE0 + 9 ook ok)</small>
-  </div>
+          <div>
+            <label for="vat">BTW / VAT</label>
+            <input id="vat" name="vat" type="text" placeholder="BE0123456789" />
+            <!-- <small class="hint" id="vatHint">Formaat: BE + 10 cijfers (BE0 + 9 ook ok)</small> -->
+          </div>
 
-  <div>
-    <label for="website">Website</label>
-    <input id="website" name="website" type="url" placeholder="https://www.bedrijf.be" />
-  </div>
+          <div>
+            <label for="website">Website</label>
+            <input id="website" name="website" type="url" placeholder="https://www.bedrijf.be" />
+          </div>
 
-  <!-- NACE combobox mount (one full cell) -->
-  <div id="nace-combobox"></div>
+          <div id="nace-combobox"></div>
 
-  <div>
-    <label for="employeeCount">Aantal werknemers</label>
-    <input id="employeeCount" name="employeeCount" type="number" inputmode="numeric" min="0" placeholder="e.g. 25" />
-  </div>
+          <div>
+            <label for="employeeCount">Aantal werknemers</label>
+            <input id="employeeCount" name="employeeCount" type="number" inputmode="numeric" min="0"
+              placeholder="e.g. 25" />
+          </div>
 
-  <div>
-    <label for="email">E-mail</label>
-    <input id="email" name="email" type="email" placeholder="info@bedrijf.be" />
-  </div>
+          <div>
+            <label for="email">E-mail</label>
+            <input id="email" name="email" type="email" placeholder="info@bedrijf.be" />
+          </div>
 
-  <div>
-    <label for="phone">Telefoon</label>
-    <input id="phone" name="phone" type="tel" placeholder="+32 …" autocomplete="tel" />
-  </div>
+          <div>
+            <label for="phone">Telefoon</label>
+            <input id="phone" name="phone" type="tel" placeholder="+32 …" autocomplete="tel" />
+          </div>
 
-  <!-- Address row -->
-  <div class="grid g-3">
-    <div>
-      <label for="street">Straat</label>
-      <input id="street" name="street" type="text" placeholder="Straatnaam" />
-    </div>
-    <div>
-      <label for="number">Nr</label>
-      <input id="number" name="number" type="text" placeholder="1A" />
-    </div>
-    <div>
-      <label for="postalCode">Postcode</label>
-      <input id="postalCode" name="postalCode" type="text" placeholder="9860" />
-    </div>
-  </div>
+          <div class="address-grid">
+            <div>
+              <label for="street">Straat</label>
+              <input id="street" name="street" type="text" placeholder="Straatnaam" />
+            </div>
+            <div>
+              <label for="number">Nr</label>
+              <input id="number" name="number" type="text" placeholder="1A" />
+            </div>
+            <div>
+              <label for="postalCode">Postcode</label>
+              <input id="postalCode" name="postalCode" type="text" placeholder="9860" />
+            </div>
+          </div>
 
-  <div>
-    <label for="city">Gemeente</label>
-    <input id="city" name="city" type="text" placeholder="Oosterzele" />
-  </div>
-</section>
+          <div>
+            <label for="city">Gemeente</label>
+            <input id="city" name="city" type="text" placeholder="Oosterzele" />
+          </div>
+        </section>
 
 
-  <!-- Contacts (Repeater) -->
-  <section class="mt-12">
-    <fieldset class="no-print-controls">
-      <legend>Contacten</legend>
-      <div id="contacts" class="repeater"></div>
-      <div class="repeater-actions">
-        <button type="button" id="btnAddContact">+ Contact toevoegen</button>
+        <!-- Contacts (Repeater) -->
+        <section class="mt-12">
+          <fieldset class="no-print-controls">
+            <legend>Contacten</legend>
+            <div id="contacts" class="repeater"></div>
+            <div class="repeater-actions">
+              <button type="button" id="btnAddContact">+ Contact toevoegen</button>
+            </div>
+<!--            <p class="hint">Duid één contact aan als “primair”.</p>-->
+          </fieldset>
+        </section>
+
+        <!-- Notes -->
+        <section class="mt-12">
+          <fieldset>
+            <legend>Notities</legend>
+            <textarea id="notes" name="notes"
+              placeholder="Context, hoe gebruiken ze de app vandaag? Opmerkingen..."></textarea>
+          </fieldset>
+        </section>
+
+        <!-- Modules & Follow-up -->
+        <section class="grid g-2 mt-12">
+          <div>
+            <label><input type="checkbox" id="needsFollowUp" name="needsFollowUp" /> Follow-up</label>
+          </div>
+          <fieldset>
+            <legend>Modules</legend>
+            <div class="grid g-2">
+              <label><input type="checkbox" name="modules" value="time_registration" /> Tijdsregistratie</label>
+              <label><input type="checkbox" name="modules" value="tacho_downloads" /> Tacho downloads</label>
+              <label><input type="checkbox" name="modules" value="tacho_analysis" /> Tacho analyse</label>
+              <label><input type="checkbox" name="modules" value="jobs" /> Jobs</label>
+              <label><input type="checkbox" name="modules" value="identification" /> Identificatie</label>
+              <label><input type="checkbox" name="modules" value="asset_management" /> Asset management</label>
+            </div>
+          </fieldset>
+        </section>
+
+        <!-- Badge & Tacho -->
+        <section class="mt-12">
+          <fieldset>
+            <legend>Badge & Tacho</legend>
+
+            <div class="grid g-3">
+              <div>
+                <label for="badgeRegime">Badgeregime</label>
+                <select id="badgeRegime" name="badgeRegime">
+                  <option value="">—</option>
+                  <option value="vehicle">Voertuig</option>
+                  <option value="time_clock">Prikklok</option>
+                  <option value="both">Beide</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="badgeType">Badgetype</label>
+                <select id="badgeType" name="badgeType">
+                  <option value="">—</option>
+                  <option value="mifare">MIFARE</option>
+                  <option value="proximity">Proximity</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="tachoFrequency">Frequentie tacho-download</label>
+                <select id="tachoFrequency" name="tachoFrequency">
+                  <option value="">—</option>
+                  <option value="daily">Dagelijks</option>
+                  <option value="weekly">Wekelijks</option>
+                  <option value="biweekly">Tweewekelijks</option>
+                  <option value="monthly">Maandelijks</option>
+                  <option value="unknown">Onbekend</option>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+        </section>
+
+        <!-- Sales -->
+        <section class="mt-12">
+          <fieldset>
+            <legend>Commercieel</legend>
+            <div class="grid g-2">
+              <div>
+                <label for="representative">Vertegenwoordiger</label>
+                <input id="representative" name="representative" type="text" placeholder="Naam vertegenwoordiger" />
+              </div>
+              <div>
+                <label for="reseller">Reseller</label>
+                <input id="reseller" name="reseller" type="text" placeholder="Partner / Reseller" />
+              </div>
+            </div>
+          </fieldset>
+        </section>
+
+
+      </form>
+
+      <!-- Actions -->
+      <div class="footer toolbar">
+        <div class="left">
+          <button type="button" id="btnReset">Reset</button>
+        </div>
+        <div class="right">
+          <button type="button" id="btnExportJson">Export JSON</button>
+          <button type="button" id="btnExportCsv">Export CSV</button>
+          <button type="button" class="primary" id="btnPrint">Save as PDF</button>
+        </div>
       </div>
-      <p class="hint">Duid één contact aan als “primair”.</p>
-    </fieldset>
-  </section>
-
-  <!-- Notes -->
-  <section class="mt-12">
-    <fieldset>
-      <legend>Notities</legend>
-      <textarea id="notes" name="notes" placeholder="Context, hoe gebruiken ze de app vandaag? Opmerkingen..."></textarea>
-    </fieldset>
-  </section>
-
-  <!-- Modules & Follow-up -->
-  <section class="grid g-2 mt-12">
-    <div>
-      <label><input type="checkbox" id="needsFollowUp" name="needsFollowUp" /> Follow-up</label>
-    </div>
-    <fieldset>
-      <legend>Modules</legend>
-      <div class="grid g-2">
-        <label><input type="checkbox" name="modules" value="time_registration" /> Tijdsregistratie</label>
-        <label><input type="checkbox" name="modules" value="tacho_downloads" /> Tacho downloads</label>
-        <label><input type="checkbox" name="modules" value="tacho_analysis" /> Tacho analyse</label>
-        <label><input type="checkbox" name="modules" value="jobs" /> Jobs</label>
-        <label><input type="checkbox" name="modules" value="identification" /> Identificatie</label>
-        <label><input type="checkbox" name="modules" value="asset_management" /> Asset management</label>
-      </div>
-    </fieldset>
-  </section>
-
-  <!-- Badge & Tacho -->
-<section class="mt-12">
-  <fieldset>
-    <legend>Badge & Tacho</legend>
-
-    <div class="grid g-3">
-      <div>
-        <label for="badgeRegime">Badgeregime</label>
-        <select id="badgeRegime" name="badgeRegime">
-          <option value="">—</option>
-          <option value="vehicle">Voertuig</option>
-          <option value="time_clock">Prikklok</option>
-          <option value="both">Beide</option>
-        </select>
-      </div>
-
-      <div>
-        <label for="badgeType">Badgetype</label>
-        <select id="badgeType" name="badgeType">
-          <option value="">—</option>
-          <option value="mifare">MIFARE</option>
-          <option value="proximity">Proximity</option>
-        </select>
-      </div>
-
-      <div>
-        <label for="tachoFrequency">Frequentie tacho-download</label>
-        <select id="tachoFrequency" name="tachoFrequency">
-          <option value="">—</option>
-          <option value="daily">Dagelijks</option>
-          <option value="weekly">Wekelijks</option>
-          <option value="biweekly">Tweewekelijks</option>
-          <option value="monthly">Maandelijks</option>
-          <option value="unknown">Onbekend</option>
-        </select>
-      </div>
-    </div>
-  </fieldset>
-</section>
-
-<!-- Commercial -->
-<section class="mt-12">
-  <fieldset>
-    <legend>Commercieel</legend>
-    <div class="grid g-2">
-      <div>
-        <label for="representative">Vertegenwoordiger</label>
-        <input id="representative" name="representative" type="text" placeholder="Naam vertegenwoordiger" />
-      </div>
-      <div>
-        <label for="reseller">Reseller</label>
-        <input id="reseller" name="reseller" type="text" placeholder="Partner / Reseller" />
-      </div>
-    </div>
-  </fieldset>
-</section>
-
-
-</form>
-
-
-
-<!-- Actions -->
-<div class="footer toolbar">
-  <div class="left">
-    <button type="button" id="btnReset">Reset</button>
-  </div>
-  <div class="right">
-    <button type="button" id="btnExportJson">Export JSON</button>
-    <button type="button" id="btnExportCsv">Export CSV</button>
-    <button type="button" class="primary" id="btnPrint">Save as PDF</button>
-  </div>
-</div>  
 
       <!-- Brand block (centered) -->
       <footer class="footer brand-block">
@@ -202,15 +203,16 @@
     </div>
   </div>
   <div style="display: none;">
-  <label for="sheetId">Sheet ID</label>
-  <input id="sheetId" name="sheetId" type="text" readonly placeholder="auto-generated" />
-</div>
-<script type="module">
-  import { initNaceCombobox } from './components/nace-combobox.js';
-  window.addEventListener('DOMContentLoaded', () => {
-    initNaceCombobox({ mountId: 'nace-combobox', src: 'data/nace.json', placeholder: 'Zoek NACE code…' });
-  });
-</script>
-<script defer src="app.js"></script>
+    <label for="sheetId">Sheet ID</label>
+    <input id="sheetId" name="sheetId" type="text" readonly placeholder="auto-generated" />
+  </div>
+  <script type="module">
+    import { initNaceCombobox } from './components/nace-combobox.js';
+    window.addEventListener('DOMContentLoaded', () => {
+      initNaceCombobox({ mountId: 'nace-combobox', src: 'data/nace.json', placeholder: 'Zoek NACE code…' });
+    });
+  </script>
+  <script defer src="app.js"></script>
 </body>
+
 </html>

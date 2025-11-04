@@ -30,7 +30,7 @@ body {
 ================================ */
 .wrap {
   max-width: 1200px;
-  margin: 32px auto;
+  margin: 48px auto;
   padding: 0 16px;
 }
 
@@ -75,6 +75,7 @@ body {
 ================================ */
 form {
   padding: 24px;
+    margin: 24px;
 }
 
 .grid {
@@ -178,6 +179,25 @@ button.primary:hover {
 
 button:active {
   transform: translateY(1px);
+}
+
+button {
+    padding: 12px;
+    margin-top: 6px;
+    --radius: 24px;
+}
+
+.address-grid {
+    display: grid;
+    grid-template-columns: 2fr 0.5fr 0.4fr; /* street postal code, number  */
+    gap: 12px;
+}
+
+@media (max-width: 900px) {
+
+    .address-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* ================================
