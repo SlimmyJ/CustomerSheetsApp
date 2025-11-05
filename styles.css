@@ -46,6 +46,14 @@ body {
   padding: 0 16px;
 }
 
+
+/* 
+*{
+  outline:  1px solid red !important;
+} */
+
+
+
 .card {
   background: var(--paper);
   border: 1px solid var(--line);
@@ -57,30 +65,70 @@ body {
   padding: 0 24px 24px;
 }
 
+/* ================================
+   Header (grid, centered title)
+================================ */
 .card header {
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--line);
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  display: grid;
+  grid-template-columns: auto 1fr auto; /* logo | title | meta */
+  align-items: center;
   gap: 8px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--line);
+  min-height: 72px;            
+  overflow: hidden;           
 }
 
 .card header h1 {
-  font-size: 22px;
+  grid-column: 2;
+  justify-self: center;
+  text-align: center;
   margin: 0;
+  font-size: 24px;
   font-weight: 700;
   letter-spacing: 0.2px;
 }
 
-.card header .meta {
-  display: flex;
-  gap: 12px;
+.topleftlogo {
+  grid-column: 1;
+  justify-self: start;
+  display: block;
+  max-height: 56px;            
+  height: auto;
+  object-fit: contain;
 }
 
-.card header .meta .muted {
-  color: var(--muted);
+.card header .meta {
+  grid-column: 3;
+  justify-self: end;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
+
+/* Small screens */
+@media (max-width: 600px) {
+  .card header { padding: 12px 16px; min-height: 64px; }
+  .topleftlogo { max-height: 48px; }
+  .card header h1 { font-size: 20px; }
+}
+
+/* Print */
+@media print {
+  .card header { border: none; padding: 0 0 8px 0; min-height: 56px; }
+  .topleftlogo { max-height: 44px; }
+  .card header h1 { font-size: 20pt; }
+}
+.brand-block .brand {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 16px;
+}
+
+
+
+
 
 /* ================================
    Form & Grid
