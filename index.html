@@ -1,238 +1,359 @@
 <!DOCTYPE html>
 <html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Geotracer Klantenfiche</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+      crossorigin="anonymous" />
 
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Geotracer Klantenfiche</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
-    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="styles.css" />
+  </head>
 
-  <link rel="stylesheet" href="styles.css" />
-</head>
-
-<body>
-  <div class="wrap">
-    <div class="card" id="sheet">
-      <header>
-<img src="Geo-Logo.png" class="topleftlogo" />
-        <h1>Klantenfiche</h1>
-        <div class="meta">
-          <small id="today"></small>
-          <small id="saveStatus" class="muted"></small>
-        </div>
-      </header>
-
-      <form id="customerForm">
-        <!-- Company & Account -->
-        <section class="grid g-2">
-          <div>
-            <label for="company">Bedrijf</label>
-            <input id="company" name="company" type="text" placeholder="Bedrijfsnaam" required />
+  <body>
+    <div class="wrap">
+      <div class="card" id="sheet">
+        <header>
+          <img src="Geo-Logo.png" class="topleftlogo" />
+          <h1>Klantenfiche</h1>
+          <div class="meta">
+            <small id="today"></small>
+            <small id="saveStatus" class="muted"></small>
           </div>
+        </header>
 
-          <div>
-            <label for="clientNumber">Klantnummer</label>
-            <input id="clientNumber" name="clientNumber" type="number" inputmode="numeric" min="0"
-              placeholder="e.g. 10234" />
-          </div>
-
-          <div>
-            <label for="vat">BTW / VAT</label>
-            <input id="vat" name="vat" type="text" placeholder="BE0123456789" />
-            <!-- <small class="hint" id="vatHint">Formaat: BE + 10 cijfers (BE0 + 9 ook ok)</small> -->
-          </div>
-
-          <div>
-            <label for="website">Website</label>
-            <input id="website" name="website" type="url" placeholder="https://www.bedrijf.be" />
-          </div>
-
-          <div id="nace-combobox"></div>
-
-          <div>
-            <label for="employeeCount">Aantal werknemers</label>
-            <input id="employeeCount" name="employeeCount" type="number" inputmode="numeric" min="1"
-              placeholder="e.g. 25" />
-          </div>
-
-          <div>
-            <label for="email">E-mail</label>
-            <input id="email" name="email" type="email" placeholder="info@bedrijf.be" />
-          </div>
-
-          <div>
-            <label for="phone">Telefoon</label>
-            <input id="phone" name="phone" type="tel" placeholder="+32 …" autocomplete="tel" />
-          </div>
-
-          <div class="address-grid">
+        <form id="customerForm">
+          <!-- Company & Account -->
+          <section class="grid g-2">
             <div>
-              <label for="street">Straat</label>
-              <input id="street" name="street" type="text" placeholder="Straatnaam" />
+              <label for="company">Bedrijf</label>
+              <input
+                id="company"
+                name="company"
+                type="text"
+                placeholder="Bedrijfsnaam"
+                required />
             </div>
+
             <div>
-              <label for="number">Nr</label>
-              <input id="number" name="number" type="text" placeholder="1A" />
+              <label for="clientNumber">Klantnummer</label>
+              <input
+                id="clientNumber"
+                name="clientNumber"
+                type="number"
+                inputmode="numeric"
+                min="0"
+                placeholder="e.g. 10234" />
             </div>
+
             <div>
-              <label for="postalCode">Postcode</label>
-              <input id="postalCode" name="postalCode" type="text" placeholder="9860" />
+              <label for="vat">BTW / VAT</label>
+              <input
+                id="vat"
+                name="vat"
+                type="text"
+                placeholder="BE0123456789" />
+              <!-- <small class="hint" id="vatHint">Formaat: BE + 10 cijfers (BE0 + 9 ook ok)</small> -->
             </div>
-          </div>
 
-          <div>
-            <label for="city">Gemeente</label>
-            <input id="city" name="city" type="text" placeholder="Oosterzele" />
-          </div>
-        </section>
-
-
-        <!-- Contacts (Repeater) -->
-        <section class="mt-12">
-          <fieldset class="no-print-controls">
-            <legend>Contacten</legend>
-            <div id="contacts" class="repeater"></div>
-            <div class="repeater-actions">
-              <button type="button" id="btnAddContact">+ Contact toevoegen</button>
+            <div>
+              <label for="website">Website</label>
+              <input
+                id="website"
+                name="website"
+                type="url"
+                placeholder="https://www.bedrijf.be" />
             </div>
-            <!--            <p class="hint">Duid één contact aan als “primair”.</p>-->
-          </fieldset>
-        </section>
+    <div>
+              <label for="city">Gemeente</label>
+              <input
+                id="city"
+                name="city"
+                type="text"
+                placeholder="Oosterzele" />
+            </div>
+          
 
-    <!-- Modules (dynamic notes per module) -->
-<section class="mt-12">
-  <fieldset>
-    <legend>Modules</legend>
-    <div class="grid g-2">
-      <label><input type="checkbox" name="modules" value="time_registration" /> Tijdsregistratie</label>
-      <label><input type="checkbox" name="modules" value="tacho_downloads" /> Tacho downloads</label>
-      <label><input type="checkbox" name="modules" value="tacho_analysis" /> Tacho analyse</label>
-      <label><input type="checkbox" name="modules" value="jobs" /> Jobs</label>
-      <label><input type="checkbox" name="modules" value="identification" /> Identificatie</label>
-      <label><input type="checkbox" name="modules" value="asset_management" /> Asset management</label>
-         <label><input type="checkbox" name="modules" value="temp_registration" /> Temperatuurregistratie</label>
-    </div>
-  </fieldset>
+           
 
-  <!-- Dynamic module notes appear here -->
-  <div id="moduleNotes" class="module-notes mt-12"></div>
-</section>
+            <div>
+              <label for="email">E-mail</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="info@bedrijf.be" />
+            </div>
 
+            <div>
+              <label for="phone">Telefoon</label>
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                placeholder="+32 …"
+                autocomplete="tel" />
+            </div>
 
-        <!-- Notes -->
-        <section class="mt-12">
-          <fieldset>
-            <legend>Notities</legend>
-            <textarea id="notes" name="notes"
-              placeholder="Context, hoe gebruiken ze de app vandaag? Opmerkingen..."></textarea>
-          </fieldset>
-        </section>
-
-   
-
-        <!-- Badge & Tacho -->
-        <section class="mt-12">
-          <fieldset>
-            <legend>Badge & Tacho</legend>
-
-            <div class="grid g-3">
+            <div class="address-grid">
               <div>
-                <label for="badgeRegime">Badgeregime</label>
-                <select id="badgeRegime" name="badgeRegime">
-                  <option value="">—</option>
-                  <option value="vehicle">Voertuig</option>
-                  <option value="time_clock">Prikklok</option>
-                  <option value="both">Beide</option>
-                </select>
+                <label for="street">Straat</label>
+                <input
+                  id="street"
+                  name="street"
+                  type="text"
+                  placeholder="Straatnaam" />
               </div>
-
               <div>
-                <label for="badgeType">Badgetype</label>
-                <select id="badgeType" name="badgeType">
-                  <option value="">—</option>
-                  <option value="mifare">MIFARE</option>
-                  <option value="proximity">Proximity</option>
+                <label for="number">Nr</label>
+                <input id="number" name="number" type="text" placeholder="1A" />
+              </div>
+              <div>
+                <label for="postalCode">Postcode</label>
+                <input
+                  id="postalCode"
+                  name="postalCode"
+                  type="text"
+                  placeholder="9860" />
+              </div>
+            </div>
+
+        
+  <div id="nace-combobox"></div>
+
+
+             <div>
+              <label for="employeeCount">Aantal werknemers</label>
+              <input
+                id="employeeCount"
+                name="employeeCount"
+                type="number"
+                inputmode="numeric"
+                min="1"
+                placeholder="e.g. 25" />
+            </div>
+          </section>
+
+          <!-- Contacts (Repeater) -->
+          <section class="mt-12">
+            <fieldset class="no-print-controls">
+              <legend>Contacten</legend>
+              <div id="contacts" class="repeater"></div>
+              <div class="repeater-actions">
+                <button type="button" id="btnAddContact">
+                  + Contact toevoegen
+                </button>
+              </div>
+              <!--            <p class="hint">Duid één contact aan als “primair”.</p>-->
+            </fieldset>
+          </section>
+
+          <!-- Modules (dynamic notes per module) -->
+          <section class="mt-12">
+            <fieldset>
+              <legend>Modules</legend>
+              <div class="grid g-2">
+                <label
+                  ><input
+                    type="checkbox"
+                    name="modules"
+                    value="time_registration" />
+                  Tijdsregistratie</label
+                >
+                <label
+                  ><input
+                    type="checkbox"
+                    name="modules"
+                    value="tacho_downloads" />
+                  Tacho downloads</label
+                >
+                <label
+                  ><input
+                    type="checkbox"
+                    name="modules"
+                    value="tacho_analysis" />
+                  Tacho analyse</label
+                >
+                <label
+                  ><input type="checkbox" name="modules" value="jobs" />
+                  Jobs</label
+                >
+                <label
+                  ><input
+                    type="checkbox"
+                    name="modules"
+                    value="identification" />
+                  Identificatie</label
+                >
+                <label
+                  ><input
+                    type="checkbox"
+                    name="modules"
+                    value="asset_management" />
+                  Asset management</label
+                >
+                <label
+                  ><input
+                    type="checkbox"
+                    name="modules"
+                    value="temp_registration" />
+                  Temperatuurregistratie</label
+                >
+                <label
+                  ><input type="checkbox" name="modules" value="ciaw" /> Checkin
+                  at work</label
+                >
+                <label
+                  ><input
+                    type="checkbox"
+                    name="modules"
+                    value="cost_analysis" />
+                  Nacalculatie</label
+                >
+              </div>
+            </fieldset>
+
+            <!-- Dynamic module notes appear here -->
+            <div id="moduleNotes" class="module-notes mt-12"></div>
+          </section>
+
+          <!-- Notes -->
+          <section class="mt-12">
+            <fieldset>
+              <legend>Notities</legend>
+              <textarea
+                id="notes"
+                name="notes"
+                placeholder="Context, hoe gebruiken ze de app vandaag? Opmerkingen..."></textarea>
+            </fieldset>
+          </section>
+
+          <!-- Badge & Tacho -->
+          <section class="mt-12">
+            <fieldset>
+              <legend>Badge & Tacho</legend>
+
+              <div class="grid g-3">
+                <div>
+                  <label for="badgeRegime">Badgeregime</label>
+                  <select id="badgeRegime" name="badgeRegime">
+                    <option value="">—</option>
+                    <option value="vehicle">Voertuig</option>
+                    <option value="time_clock">Prikklok</option>
+                    <option value="both">Beide</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label for="badgeType">Badgetype</label>
+                  <select id="badgeType" name="badgeType">
+                    <option value="">—</option>
+                    <option value="mifare">MIFARE</option>
+                    <option value="proximity">Proximity</option>
                     <option value="proximity">Dallas</option>
-                </select>
+                  </select>
+                </div>
+
+                <div>
+                  <label for="tachoFrequency">Frequentie tacho-download</label>
+                  <select id="tachoFrequency" name="tachoFrequency">
+                    <option value="">—</option>
+                    <option value="daily">Dagelijks</option>
+                    <option value="weekly">Wekelijks</option>
+                    <option value="biweekly">Tweewekelijks</option>
+                  </select>
+                </div>
               </div>
+            </fieldset>
+          </section>
 
-              <div>
-                <label for="tachoFrequency">Frequentie tacho-download</label>
-                <select id="tachoFrequency" name="tachoFrequency">
-                  <option value="">—</option>
-                  <option value="daily">Dagelijks</option>
-                  <option value="weekly">Wekelijks</option>
-                  <option value="biweekly">Tweewekelijks</option>          
-                </select>
+          <!-- Sales -->
+          <section class="mt-12">
+            <fieldset>
+              <legend>Commercieel</legend>
+              <div class="grid g-2">
+                <div>
+                  <label for="representative">Vertegenwoordiger</label>
+                  <input
+                    id="representative"
+                    name="representative"
+                    type="text"
+                    placeholder="Naam vertegenwoordiger" />
+                </div>
+                <div>
+                  <label for="reseller">Reseller</label>
+                  <input
+                    id="reseller"
+                    name="reseller"
+                    type="text"
+                    placeholder="Partner / Reseller" />
+                </div>
               </div>
-            </div>
-          </fieldset>
-        </section>
+            </fieldset>
+          </section>
+        </form>
 
-        <!-- Sales -->
-        <section class="mt-12">
-          <fieldset>
-            <legend>Commercieel</legend>
-            <div class="grid g-2">
-              <div>
-                <label for="representative">Vertegenwoordiger</label>
-                <input id="representative" name="representative" type="text" placeholder="Naam vertegenwoordiger" />
-              </div>
-              <div>
-                <label for="reseller">Reseller</label>
-                <input id="reseller" name="reseller" type="text" placeholder="Partner / Reseller" />
-              </div>
-            </div>
-          </fieldset>
-        </section>
-
-
-      </form>
-
-      <!-- Actions -->
-      <div class="footer toolbar">
-        <div class="left">
-          <button type="button" id="btnReset">Reset</button>
+        <!-- Actions -->
+        <div class="footer toolbar">
+          <div class="left">
+            <button type="button" id="btnReset">Reset</button>
+          </div>
+          <div class="right">
+            <button type="button" id="btnExportJson">Export JSON</button>
+            <button type="button" id="btnExportCsv">Export CSV</button>
+            <button type="button" class="primary" id="btnPrint">
+              Save as PDF
+            </button>
+          </div>
         </div>
-        <div class="right">
-          <button type="button" id="btnExportJson">Export JSON</button>
-          <button type="button" id="btnExportCsv">Export CSV</button>
-          <button type="button" class="primary" id="btnPrint">Save as PDF</button>
-        </div>
+
+        <!-- Brand block (centered) -->
+        <footer class="footer brand-block">
+          <p class="brand">GeoTracer</p>
+          <p class="location">
+            Lange Ambachtstraat 16 A, 9860 Oosterzele, België<br />BE
+            0448.296.881
+          </p>
+        </footer>
       </div>
-
-      <!-- Brand block (centered) -->
-      <footer class="footer brand-block">
-        <p class="brand">GeoTracer</p>
-        <p class="location">Lange Ambachtstraat 16 A, 9860 Oosterzele, België<br>BE 0448.296.881</p>
-      </footer>
     </div>
-  </div>
-  <div style="display: none;">
-    <label for="sheetId">Sheet ID</label>
-    <input id="sheetId" name="sheetId" type="text" readonly placeholder="auto-generated" />
-  </div>
+    <div style="display: none">
+      <label for="sheetId">Sheet ID</label>
+      <input
+        id="sheetId"
+        name="sheetId"
+        type="text"
+        readonly
+        placeholder="auto-generated" />
+    </div>
 
-  <!-- Optional JavaScript -->
-  <script defer src="app.js"></script>
-  <script type="module">
-    import { initNaceCombobox } from './components/nace-combobox.js';
-    window.addEventListener('DOMContentLoaded', () => {
-      initNaceCombobox({ mountId: 'nace-combobox', src: 'data/nace.json', placeholder: 'Zoek NACE code…' });
-    });
-  </script>
-  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-    integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
-    crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-    integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-    crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"
-    integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-    crossorigin="anonymous"></script>
-
-</body>
-
+    <!-- Optional JavaScript -->
+    <script defer src="app.js"></script>
+    <script type="module">
+      import { initNaceCombobox } from "./components/nace-combobox.js";
+      window.addEventListener("DOMContentLoaded", () => {
+        initNaceCombobox({
+          mountId: "nace-combobox",
+          src: "data/nace.json",
+          placeholder: "Zoek NACE code…",
+        });
+      });
+    </script>
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script
+      src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+      integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+      crossorigin="anonymous"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+      integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+      crossorigin="anonymous"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"
+      integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+      crossorigin="anonymous"></script>
+  </body>
 </html>

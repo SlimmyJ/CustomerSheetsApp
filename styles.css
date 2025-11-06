@@ -545,3 +545,54 @@ footer.footer.brand-block {
     margin: 16mm;
   }
 }
+
+
+/* ================================
+   Compact "Company & Account" for PRINT
+   (targets the first section in the form)
+================================ */
+@media print {
+  /* First section is the Company & Account block in your HTML */
+  #sheet form > section:first-of-type {
+    /* pull section closer to header */
+    margin-top: 6px;
+    padding-top: 0;
+  }
+
+  /* Switch to denser 3-col grid on print */
+  #sheet form > section:first-of-type.grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  /* Labels smaller & tighter */
+  #sheet form > section:first-of-type label {
+    font-size: 9pt !important;
+    font-weight: 600;
+    margin-bottom: 2px !important;
+    line-height: 1.2;
+  }
+
+  /* Inputs compact with subtle underline to show value area */
+  #sheet form > section:first-of-type input:not([type="checkbox"]):not([type="radio"]),
+  #sheet form > section:first-of-type select,
+  #sheet form > section:first-of-type textarea {
+    padding: 2px 0 !important;
+    margin: 0 !important;
+    line-height: 1.1 !important;
+    border: none !important;
+    
+    border-radius: 0 !important;
+  }
+
+  /* Address trio tighter */
+  #sheet form > section:first-of-type .address-grid {
+    grid-template-columns: 2fr 0.7fr 0.7fr !important;
+    gap: 6px !important;
+  }
+
+  /* Make date/meta area slightly tighter too */
+  .card header {
+    padding-bottom: 6px !important;
+  }
+}

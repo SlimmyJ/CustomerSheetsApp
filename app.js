@@ -16,6 +16,8 @@ const MODULE_LABELS = {
   identification: "Identificatie",
   asset_management: "Asset management",
   temp_registration: "Temperatuurregistratie",
+  ciaw: "Checkin at work",
+  cost_analysis: "Nacalculatie",
 };
 
 const STORAGE_KEY = "customerSheet.v1";
