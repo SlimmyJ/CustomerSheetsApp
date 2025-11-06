@@ -1,45 +1,41 @@
-const BE_VAT_REGEX = /^BE\s?0?\d{9}$/i;
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const E164_LOOSE = /^\+[\d\s\-().]{7,}$/; // relaxed for UX
+"use strict";
 
-function markValidity(el, ok, hintSel) {
-  if (!el) return;
-  el.classList.toggle("is-invalid", !ok);
-  if (hintSel) {
-    const h = document.querySelector(hintSel);
-    if (h) h.classList.toggle("error", !ok);
-  }
-}
-
-// ---------- helpers ----------
+/* ---------- tiny helpers ---------- */
 const el = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+/* ---------- constants ---------- */
+const BE_VAT_REGEX = /^BE\s?0?\d{9}$/i;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const E164_LOOSE = /^\+[\d\s\-().]{7,}$/;
+const MODULE_LABELS = {
+  time_registration: "Tijdsregistratie",
+  tacho_downloads: "Tacho downloads",
+  tacho_analysis: "Tacho analyse",
+  jobs: "Jobs",
+  identification: "Identificatie",
+  asset_management: "Asset management",
+  temp_registration: "Temperatuurregistratie",
+};
 
 const STORAGE_KEY = "customerSheet.v1";
 const STATUS_DEBOUNCE_MS = 400;
 
-const todayEl = el("#today");
-if (todayEl) {
-  todayEl.textContent = new Date().toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-  });
-}
-const saveStatusEl = el("#saveStatus");
-
-const uuid = () =>
-  "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+/* ---------- utils ---------- */
+function uuid() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = crypto.getRandomValues(new Uint8Array(1))[0] & 15;
     const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
+}
 
-const safeFileBase = (s) =>
-  s
+function safeFileBase(s = "") {
+  return s
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
+}
 
 function download(filename, mime, content) {
   const blob = new Blob([content], { type: mime });
@@ -54,9 +50,31 @@ function download(filename, mime, content) {
   URL.revokeObjectURL(url);
 }
 
-// ---------- contacts state ----------
-let contacts = []; // array of objects
+function escapeHtml(s = "") {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
 
+function markValidity(elm, ok, hintSel) {
+  if (!elm) return;
+  elm.classList.toggle("is-invalid", !ok);
+  if (hintSel) {
+    const h = document.querySelector(hintSel);
+    if (h) h.classList.toggle("error", !ok);
+  }
+}
+
+/* ---------- state ---------- */
+let contacts = []; // array of contact objects
+let moduleNotes = {}; // { moduleKey: "notes" }
+let currentId = null;
+let saveTimer = null;
+let saveStatusEl = null;
+
+/* ---------- contacts ---------- */
 function newContact(overrides = {}) {
   return {
     id: uuid(),
@@ -64,7 +82,7 @@ function newContact(overrides = {}) {
     role: "Owner",
     email: "",
     phone: "",
-    primary: contacts.length === 0, // first is primary by default
+    primary: contacts.length === 0,
     channel: "email",
     notes: "",
     ...overrides,
@@ -97,7 +115,7 @@ function renderContacts() {
 
   if (!contacts.length) contacts.push(newContact());
 
-  contacts.forEach((c, idx) => {
+  contacts.forEach((c) => {
     const card = document.createElement("div");
     card.className = "contact-card";
     card.dataset.id = c.id;
@@ -175,11 +193,10 @@ function renderContacts() {
       </div>
     `;
 
-    // wire events
+    // input events
     card.addEventListener("input", (e) => {
       const key = e.target?.dataset?.k;
-      if (!key) return;
-      if (key === "primary") return; // handled on change
+      if (!key || key === "primary") return;
       upsertContact(c.id, { [key]: e.target.value });
     });
     card.addEventListener("change", (e) => {
@@ -187,10 +204,7 @@ function renderContacts() {
       if (!key) return;
       if (key === "primary") {
         if (e.target.checked) setPrimary(c.id);
-        else {
-          // unchecking primary keeps it primary to ensure one primary exists
-          renderContacts();
-        }
+        else renderContacts();
       } else if (key === "role" || key === "channel") {
         upsertContact(c.id, { [key]: e.target.value });
       }
@@ -203,15 +217,46 @@ function renderContacts() {
   });
 }
 
-function escapeHtml(s = "") {
-  return String(s)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+/* ---------- module notes ---------- */
+function renderModuleNotes() {
+  const host = el("#moduleNotes");
+  if (!host) return;
+
+  const checked = $$('input[name="modules"]:checked').map((i) => i.value);
+
+  host.innerHTML = "";
+  checked.forEach((mod) => {
+    const title = MODULE_LABELS[mod] || mod;
+    const value = moduleNotes[mod] || "";
+
+    const wrap = document.createElement("fieldset");
+    wrap.className = "module-note";
+    wrap.innerHTML = `
+      <legend>${escapeHtml(title)}</legend>
+      <textarea data-module="${mod}" rows="4" placeholder="Notities voor ${escapeHtml(
+      title
+    )}…">${escapeHtml(value)}</textarea>
+    `;
+
+    wrap.querySelector("textarea").addEventListener("input", (e) => {
+      moduleNotes[mod] = e.target.value;
+      scheduleSave();
+    });
+
+    host.appendChild(wrap);
+  });
 }
 
-// ---------- form collect/fill ----------
+function wireModuleCheckboxes() {
+  $$('input[name="modules"]').forEach((chk) => {
+    chk.addEventListener("change", () => {
+      renderModuleNotes();
+      scheduleSave();
+    });
+  });
+}
+
+/* ---------- form collect/fill ---------- */
 function collectForm() {
   const form = el("#customerForm");
   const modules = $$('input[name="modules"]:checked', form).map((i) => i.value);
@@ -222,17 +267,17 @@ function collectForm() {
     id: currentId || uuid(),
     company: el("#company").value.trim(),
     clientNumber: Number(el("#clientNumber").value || 0),
-    vat: el("#vat").value.trim(),
+    vat: el("#vat")?.value.trim() || "",
     nace: (naceEl?.value || "").trim(),
     employeeCount: Number(el("#employeeCount").value || 0),
-    email: el("#email").value.trim(),
+    email: el("#email")?.value.trim() || "",
     phone: el("#phone").value.trim(),
-    website: el("#website").value.trim(),
+    website: el("#website")?.value.trim() || "",
     address: {
-      street: el("#street").value.trim(),
-      number: el("#number").value.trim(),
-      postalCode: el("#postalCode").value.trim(),
-      city: el("#city").value.trim(),
+      street: el("#street")?.value.trim() || "",
+      number: el("#number")?.value.trim() || "",
+      postalCode: el("#postalCode")?.value.trim() || "",
+      city: el("#city")?.value.trim() || "",
       country: "BE",
     },
     badgeRegime: el("#badgeRegime")?.value || "",
@@ -240,12 +285,13 @@ function collectForm() {
     tachoDownloadFrequency: el("#tachoFrequency")?.value || "",
     representative: el("#representative")?.value.trim() || "",
     reseller: el("#reseller")?.value.trim() || "",
-    notes: el("#notes").value.trim(),
-    needsFollowUp: el("#needsFollowUp").checked,
+    // UI follow-up was removed; guard remains for backward compatibility
+    needsFollowUp: !!el("#needsFollowUp") && el("#needsFollowUp").checked,
     modules,
+    moduleNotes: { ...moduleNotes },
     contacts: contacts.slice(),
     createdAtISO: new Date().toISOString(),
-    version: 1,
+    version: 2,
   };
 }
 
@@ -271,20 +317,31 @@ function fillForm(d) {
   el("#representative") &&
     (el("#representative").value = d.representative ?? "");
   el("#reseller") && (el("#reseller").value = d.reseller ?? "");
-
   el("#notes").value = d.notes ?? "";
-  el("#needsFollowUp").checked = !!d.needsFollowUp;
+
+  if (el("#needsFollowUp")) el("#needsFollowUp").checked = !!d.needsFollowUp;
 
   const naceEl =
     document.getElementById("naceInput") || document.getElementById("nace");
   if (naceEl) naceEl.value = d.nace ?? "";
 
+  // restore modules
   $$('input[name="modules"]').forEach((chk) => {
     chk.checked = Array.isArray(d.modules)
       ? d.modules.includes(chk.value)
       : false;
   });
 
+  // restore per-module notes
+  moduleNotes =
+    d.moduleNotes && typeof d.moduleNotes === "object"
+      ? { ...d.moduleNotes }
+      : {};
+
+  // render based on restored state
+  renderModuleNotes();
+
+  // contacts
   contacts =
     Array.isArray(d.contacts) && d.contacts.length
       ? d.contacts
@@ -292,10 +349,7 @@ function fillForm(d) {
   renderContacts();
 }
 
-// ---------- autosave ----------
-let currentId = null;
-let saveTimer = null;
-
+/* ---------- autosave ---------- */
 function scheduleSave() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(saveDraft, STATUS_DEBOUNCE_MS);
@@ -343,7 +397,6 @@ function loadDraft() {
   }
 }
 
-// Wire autosave on input changes
 function wireAutosave() {
   const form = el("#customerForm");
   form.addEventListener("input", scheduleSave);
@@ -375,7 +428,7 @@ function wireValidation() {
   }
 }
 
-// ---------- actions ----------
+/* ---------- actions ---------- */
 function ensureMinimal() {
   const company = el("#company").value.trim();
   if (!company) {
@@ -386,99 +439,131 @@ function ensureMinimal() {
   return true;
 }
 
-el("#btnExportJson").addEventListener("click", () => {
-  if (!ensureMinimal()) return;
-  const data = collectForm();
-  const base = data.company ? safeFileBase(data.company) : "customer";
-  download(
-    `customer-sheet_${base}.json`,
-    "application/json",
-    JSON.stringify(data, null, 2)
-  );
-});
+function wireButtons() {
+  el("#btnExportJson").addEventListener("click", () => {
+    if (!ensureMinimal()) return;
+    const data = collectForm();
+    const base = data.company ? safeFileBase(data.company) : "customer";
+    download(
+      `customer-sheet_${base}.json`,
+      "application/json",
+      JSON.stringify(data, null, 2)
+    );
+  });
 
-el("#btnExportCsv").addEventListener("click", () => {
-  if (!ensureMinimal()) return;
-  const d = collectForm();
-  const headers = [
-    "company",
-    "clientNumber",
-    "vat",
-    "nace",
-    "employeeCount",
-    "email",
-    "phone",
-    "website",
-    "street",
-    "number",
-    "postalCode",
-    "city",
-    "country",
-    "badgeRegime",
-    "badgeType",
-    "tachoDownloadFrequency",
-    "representative",
-    "reseller",
-    "needsFollowUp",
-    "modules",
-    "notes",
-    "createdAtISO",
-  ];
-  const values = [
-    d.company,
-    d.clientNumber,
-    d.vat,
-    d.nace,
-    d.employeeCount,
-    d.email,
-    d.phone,
-    d.website,
-    d.address?.street || "",
-    d.address?.number || "",
-    d.address?.postalCode || "",
-    d.address?.city || "",
-    d.address?.country || "BE",
-    d.badgeRegime,
-    d.badgeType,
-    d.tachoDownloadFrequency,
-    d.representative,
-    d.reseller,
-    d.needsFollowUp,
-    d.modules.join("|"),
-    (d.notes || "").replace(/\r?\n/g, " "),
-    d.createdAtISO,
-  ];
-  const csv = [
-    headers.join(","),
-    values.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","),
-  ].join("\n");
-  const base = d.company ? safeFileBase(d.company) : "customer";
-  download(`customer-sheet_${base}.csv`, "text/csv", csv);
-});
+  el("#btnExportCsv").addEventListener("click", () => {
+    if (!ensureMinimal()) return;
+    const d = collectForm();
 
-el("#btnPrint").addEventListener("click", () => {
-  if (!ensureMinimal()) return;
-  window.print();
-});
+    const baseHeaders = [
+      "company",
+      "clientNumber",
+      "vat",
+      "nace",
+      "employeeCount",
+      "email",
+      "phone",
+      "website",
+      "street",
+      "number",
+      "postalCode",
+      "city",
+      "country",
+      "badgeRegime",
+      "badgeType",
+      "tachoDownloadFrequency",
+      "representative",
+      "reseller",
+      "needsFollowUp",
+      "modules",
+      "notes",
+      "createdAtISO",
+    ];
 
-el("#btnReset").addEventListener("click", () => {
-  if (!confirm("Formulier en concept wissen?")) return;
-  el("#customerForm").reset();
-  contacts = [newContact()];
+    const noteKeys = Object.keys(MODULE_LABELS);
+    const noteHeaders = noteKeys.map((k) => `notes_${k}`);
+
+    const headers = [...baseHeaders, ...noteHeaders];
+
+    const values = [
+      d.company,
+      d.clientNumber,
+      d.vat,
+      d.nace,
+      d.employeeCount,
+      d.email,
+      d.phone,
+      d.website,
+      d.address?.street || "",
+      d.address?.number || "",
+      d.address?.postalCode || "",
+      d.address?.city || "",
+      d.address?.country || "BE",
+      d.badgeRegime,
+      d.badgeType,
+      d.tachoDownloadFrequency,
+      d.representative,
+      d.reseller,
+      d.needsFollowUp,
+      d.modules.join("|"),
+      (d.notes || "").replace(/\r?\n/g, " "),
+      d.createdAtISO,
+      ...noteKeys.map((k) =>
+        d.moduleNotes && d.moduleNotes[k]
+          ? String(d.moduleNotes[k]).replace(/\r?\n/g, " ")
+          : ""
+      ),
+    ];
+
+    const csv = [
+      headers.join(","),
+      values.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","),
+    ].join("\n");
+    const base = d.company ? safeFileBase(d.company) : "customer";
+    download(`customer-sheet_${base}.csv`, "text/csv", csv);
+  });
+
+  el("#btnPrint").addEventListener("click", () => {
+    if (!ensureMinimal()) return;
+    window.print();
+  });
+
+  el("#btnReset").addEventListener("click", () => {
+    if (!confirm("Formulier en concept wissen?")) return;
+    el("#customerForm").reset();
+    contacts = [newContact()];
+    moduleNotes = {};
+    renderContacts();
+    renderModuleNotes();
+    localStorage.removeItem(STORAGE_KEY);
+    if (saveStatusEl) saveStatusEl.textContent = "";
+  });
+
+  el("#btnAddContact").addEventListener("click", () => {
+    contacts.push(newContact());
+    renderContacts();
+    scheduleSave();
+  });
+}
+
+/* ---------- init ---------- */
+window.addEventListener("DOMContentLoaded", () => {
+  // date + status
+  const todayEl = el("#today");
+  if (todayEl) {
+    todayEl.textContent = new Date().toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+    });
+  }
+  saveStatusEl = el("#saveStatus");
+
+  wireButtons();
+  wireAutosave();
+  wireValidation();
+  wireModuleCheckboxes();
+  loadDraft();
   renderContacts();
-  localStorage.removeItem(STORAGE_KEY);
-  if (saveStatusEl) saveStatusEl.textContent = "";
+  renderModuleNotes();
 });
-
-// add-contact
-el("#btnAddContact").addEventListener("click", () => {
-  contacts.push(newContact());
-  renderContacts();
-  scheduleSave();
-});
-
-// ---------- init ----------
-loadDraft();
-wireAutosave();
-wireValidation();
-renderContacts();

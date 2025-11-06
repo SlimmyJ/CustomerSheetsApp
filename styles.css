@@ -463,6 +463,26 @@ footer.footer.brand-block {
   }
 }
 
+
+/* Module notes list */
+.module-notes {
+  display: grid;
+  gap: 12px;
+}
+
+.module-notes .module-note {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.module-notes .module-note legend {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+
+
 /* ================================
    Print
 ================================ */

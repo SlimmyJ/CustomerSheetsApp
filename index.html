@@ -100,6 +100,26 @@
           </fieldset>
         </section>
 
+    <!-- Modules (dynamic notes per module) -->
+<section class="mt-12">
+  <fieldset>
+    <legend>Modules</legend>
+    <div class="grid g-2">
+      <label><input type="checkbox" name="modules" value="time_registration" /> Tijdsregistratie</label>
+      <label><input type="checkbox" name="modules" value="tacho_downloads" /> Tacho downloads</label>
+      <label><input type="checkbox" name="modules" value="tacho_analysis" /> Tacho analyse</label>
+      <label><input type="checkbox" name="modules" value="jobs" /> Jobs</label>
+      <label><input type="checkbox" name="modules" value="identification" /> Identificatie</label>
+      <label><input type="checkbox" name="modules" value="asset_management" /> Asset management</label>
+         <label><input type="checkbox" name="modules" value="temp_registration" /> Temperatuurregistratie</label>
+    </div>
+  </fieldset>
+
+  <!-- Dynamic module notes appear here -->
+  <div id="moduleNotes" class="module-notes mt-12"></div>
+</section>
+
+
         <!-- Notes -->
         <section class="mt-12">
           <fieldset>
@@ -109,23 +129,7 @@
           </fieldset>
         </section>
 
-        <!-- Modules & Follow-up -->
-        <section class="grid g-2 mt-12">
-          <div>
-            <label><input type="checkbox" id="needsFollowUp" name="needsFollowUp" /> Follow-up</label>
-          </div>
-          <fieldset>
-            <legend>Modules</legend>
-            <div class="grid g-2">
-              <label><input type="checkbox" name="modules" value="time_registration" /> Tijdsregistratie</label>
-              <label><input type="checkbox" name="modules" value="tacho_downloads" /> Tacho downloads</label>
-              <label><input type="checkbox" name="modules" value="tacho_analysis" /> Tacho analyse</label>
-              <label><input type="checkbox" name="modules" value="jobs" /> Jobs</label>
-              <label><input type="checkbox" name="modules" value="identification" /> Identificatie</label>
-              <label><input type="checkbox" name="modules" value="asset_management" /> Asset management</label>
-            </div>
-          </fieldset>
-        </section>
+   
 
         <!-- Badge & Tacho -->
         <section class="mt-12">
@@ -149,6 +153,7 @@
                   <option value="">—</option>
                   <option value="mifare">MIFARE</option>
                   <option value="proximity">Proximity</option>
+                    <option value="proximity">Dallas</option>
                 </select>
               </div>
 
@@ -158,9 +163,7 @@
                   <option value="">—</option>
                   <option value="daily">Dagelijks</option>
                   <option value="weekly">Wekelijks</option>
-                  <option value="biweekly">Tweewekelijks</option>
-                  <option value="monthly">Maandelijks</option>
-                  <option value="unknown">Onbekend</option>
+                  <option value="biweekly">Tweewekelijks</option>          
                 </select>
               </div>
             </div>
